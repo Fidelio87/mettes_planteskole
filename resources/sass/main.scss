@@ -1,0 +1,18 @@
+@import "../../vendor/bower_components/bootstrap-sass/assets/stylesheets/bootstrap";
+
+html {
+  color: red;
+
+  .jumbo-test {
+    color: blue;
+    
+    .btn {
+      background-color: #8a6d3b;
+      border: $border-radius-large;
+    }
+
+    p {
+      color: #4cae4c;
+    }
+  }
+}
