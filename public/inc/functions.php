@@ -83,15 +83,17 @@ function query_error($query, $line_number, $file_name)
 function show_dev_info()
 {
     // If developer status is set to true, show all information from get/post/files/session/cookie
-    if (DEVELOPER_STATUS)
-    {
+//    if (DEVELOPER_STATUS)
+//    {
         echo '<br>';
         prettyprint($_GET, 'GET ');
         prettyprint($_POST, 'POST ');
         prettyprint($_FILES, 'FILES ');
         prettyprint($_SESSION, 'SESSION ');
         prettyprint($_COOKIE, 'COOKIE ');
-    }
+
+//        print_r($side);
+//    }
 }
 
 /**
@@ -264,9 +266,10 @@ function fingerprint()
 
 /**
  * Function to run on login
- * @param string $email: The typed e-mail address
- * @param string $password_ The typed password
+ * @param string $email : The typed e-mail address
+ * @param $password
  * @return bool
+ * @internal param string $password_ The typed password
  */
 function login($email, $password)
 {
@@ -285,31 +288,28 @@ function login($email, $password)
         // Select active user that matches the typed e-mail address
         $query	=
             "SELECT 
-				user_id, user_name, user_password, role_access_level
+				bruger_id, bruger_brugernavn, bruger_password, rolle_niveau
 			FROM 
-				users
+				brugere
 			INNER JOIN 
-				roles ON users.fk_role_id = roles.role_id
+				roller ON brugere.fk_rolle_id = roller.rolle_id
 			WHERE 
-				user_email = '$email' 
+				bruger_email = '$email' 
 			AND 
-				user_status = 1";
+				bruger_status = 1";
         $result = $mysqli->query($query);
 
         // If result returns false, use the function query_error to show debugging info
-        if (!$result)
-        {
+        if (!$result) {
             query_error($query, __LINE__, __FILE__);
         }
 
         // If a user with the typed email was found in the database, do this
-        if ( $result->num_rows == 1 )
-        {
+        if ( $result->num_rows == 1 ) {
             $row = $result->fetch_object();
 
             // Check if the typed password matched the hashed password in the Database
-            if ( password_verify($password, $row->user_password) )
-            {
+            if ( password_verify($password, $row->user_password) ) {
                 // Give the current session a new id before saving user information into it
                 session_regenerate_id();
 
@@ -318,10 +318,7 @@ function login($email, $password)
                 $_SESSION['fingerprint'] 			= fingerprint();
 
                 return true;
-            }
-            // If the typed password didn't match the hashed password in the Database
-            else
-            {
+            } else {
                 alert('warning', 'Den indtastede e-mailadresse og/eller adgangskode er ikke korrekt');
             }
         }
@@ -434,3 +431,49 @@ function send_mail($to, $subject, $message, $from, $from_name)
     // Mail it
     return mail($to, $subject, $message, $headers);
 }
+
+/**
+ *  Function that return products based on category given in URL
+ * @param integer $category_sort
+ * @return bool|mysqli_result
+ */
+function getProducts($category_sort)
+{
+    global $mysqli;
+//    $category_sort = $_GET['kategori'];
+    return $mysqli->query('SELECT 
+                                    produkt_id, produkt_varenr, produkt_navn, produkt_pris
+                                    FROM 
+                                      produkter
+                                    LEFT JOIN 
+                                      kategorier ON produkter.fk_kategori_id = kategorier.kategori_id
+                                    WHERE 
+                                      produkt_status = 1 AND kategori_id = ' . $category_sort . '
+                                    ORDER BY kategori_navn, produkt_pris');
+}
+
+
+    function getProduct($id) {
+        global $mysqli;
+        return $mysqli->query("SELECT 
+                                    produkt_id, 
+                                    produkt_varenr, 
+                                    produkt_navn, 
+                                    produkt_beskrivelse,
+                                    produkt_pris, 
+                                    DATE_FORMAT(produkt_dyrktid_fra,'%M') AS dyrk_maaned_fra,
+                                    DATE_FORMAT(produkt_dyrktid_til,'%M') AS dyrk_maaned_til,
+                                    produkt_billede1,
+                                    produkt_billede2,
+                                    produkt_billede3,
+                                    jordtype_navn,
+                                    kategori_navn
+                                    FROM 
+                                      produkter
+                                    INNER JOIN
+                                      jordtyper ON produkter.fk_jordtype_id = jordtyper.jordtype_id
+                                    INNER JOIN
+                                      kategorier ON produkter.fk_kategori_id = kategorier.kategori_id
+                                    WHERE 
+                                      produkt_status = 1 AND produkt_id = " . $id);
+    }

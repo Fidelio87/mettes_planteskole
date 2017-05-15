@@ -5,12 +5,11 @@
  * Date: 27/04/2017
  * Time: 08:40
  */
-ob_start();
 session_start();
 
 $root			= '';
 $include_path	= 'includes/';
-define('DEVELOPER_STATUS',	true);
+define('DEVELOPER_STATUS',	false);
 
 // If developer status is true / enabled
 if (DEVELOPER_STATUS)
@@ -27,11 +26,11 @@ else
 require '../public/inc/functions.php';
 
 // If user is logged in, use functions to match fingerprint and last activity and log the user out if one of them return false
-if ( isset($_SESSION['user']['id']) )
-{
-    check_fingerprint();
-    check_last_activity();
-}
+//if ( isset($_SESSION['user']['id']) )
+//{
+//    check_fingerprint();
+//    check_last_activity();
+//}
 
 // Configuration for Database
 $db_host	= 'localhost';
@@ -46,10 +45,12 @@ $mysqli		= new mysqli($db_host, $db_user, $db_pass, $db_name);
 if ( $mysqli->connect_error ) connect_error(__LINE__, __FILE__);
 
 // Set charset from Db text to utf8
-$mysqli->set_charset('utf8mb4');
+$mysqli->set_charset('utf8');
 
 // Set the database server to danish names for date and times
 $result = $mysqli->query("SET lc_time_names = 'da_DK';");
 
 // If result returns false, use the function query_error to show debugging info
 if (!$result) query_error($query, __LINE__, __FILE__);
+
+ob_start();

@@ -11,3 +11,4 @@ gen
 database/
 /vendor/node_modules/
 /vendor/bower_components/
+/vendor/vendor/
