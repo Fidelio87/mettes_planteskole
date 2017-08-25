@@ -33,7 +33,7 @@ if (isset($_GET['product'])) {
     <div class="row">
         <br>
         <p class="col-sm-12 col-lg-8"><i><?php echo $row['produkt_beskrivelse']; ?></i></p>
-<!--TODO figure out a way to display placeholders if product does not have 3 pictures plus get correct collation for danish letters str8-->
+<!-- TODO: figure out a way to display placeholders if product does not have 3 pictures plus get correct collation for danish letters str8 -->
     </div>
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">

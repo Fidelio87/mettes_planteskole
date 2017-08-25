@@ -7,7 +7,7 @@
  */
 
 if (isset($_GET['category'])) {
-    $kateori_url_id = mysqli_real_escape_string($mysqli, $_GET['category']);
+    $kateori_url_id = mysqli_real_escape_string($db, $_GET['category']);
 } else {
     $kateori_url_id = '';
 }
@@ -20,7 +20,7 @@ if (isset($_GET['category'])) {
             <?php
 
             $query = "SELECT * FROM kategorier ORDER BY kategori_id";
-            $result = mysqli_query($mysqli, $query);
+            $result = mysqli_query($db, $query);
 
             if (!$result) {
                 query_error($query, __LINE__, __FILE__);

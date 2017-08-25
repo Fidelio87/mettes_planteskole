@@ -6,19 +6,22 @@
  * Time: 14:19
  */
 
-if ( isset($_SESSION['user']['id']) )
+if (isset($_SESSION['user']['id']))
 {
-    header('Location: index.php?');
+    redirect_to('Location: index.php');
     exit;
 }
 
 $name = $email  = '';
 
-if ( isset($_POST['create_user']) ) {
-    $name	= $mysqli->escape_string($_POST['user_name']);
-    $email	= $mysqli->escape_string($_POST['user_email']);
+if (isset($_POST['create_user'])) {
+    $name  = $db->escape_string($_POST['user_name']);
+    $email = $db->escape_string($_POST['user_email']);
 
-    if ( empty($_POST['user_name']) || empty($_POST['user_email']) || empty($_POST['user_password']) || empty($_POST['confirm_user_password']) ) {
+    if (empty($_POST['user_name']) ||
+         empty($_POST['user_email']) ||
+         empty($_POST['user_password']) ||
+         empty($_POST['confirm_user_password']) ) {
         alert('warning', 'Alle felter er ikke udfyldt!');
     } else {
         $query =
@@ -28,7 +31,7 @@ if ( isset($_POST['create_user']) ) {
 				brugere
 			WHERE 
 				bruger_email = '$email'";
-        $result = $mysqli->query($query);
+        $result = $db->query($query);
 
         if (!$result) query_error($query, __LINE__, __FILE__);
 
@@ -45,7 +48,7 @@ if ( isset($_POST['create_user']) ) {
 						brugere (bruger_brugernavn, bruger_email, bruger_password) 
 					VALUES 
 						('$name', '$email', '$password_hash')";
-                $result = $mysqli->query($query);
+                $result = $db->query($query);
 
                 if (!$result) query_error($query, __LINE__, __FILE__);
 

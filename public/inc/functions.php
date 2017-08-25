@@ -15,7 +15,9 @@ function alert($type, $msg)
 {
     ?>
     <div class="alert alert-<?php echo $type ?> alert-dismissible" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
         <?php echo $msg ?>
     </div>
     <?php
@@ -26,16 +28,16 @@ function alert($type, $msg)
  * @param int $line_number: The current line number where the function is runned. Use magic constant __LINE__
  * @param string $file_name: The current file where the function is runned. Use magic constant __FILE__
  */
-function connect_error($line_number, $file_name) {
-    global $mysqli;
+function connect_error($line_number, $file_name)
+{
+    global $db;
 
     // If developer status is set to true, show all information
     if (DEVELOPER_STATUS) {
-        die('<p>Forbindelsesfejl (' . $mysqli->connect_errno . '): ' . $mysqli->connect_error . '</p><p>Linje: ' . $line_number . '</p><p>Fil: ' . $file_name . '</p>');
-    }
+        die('<p>Forbindelsesfejl (' . $db->connect_errno . '): ' . $db->connect_error . '</p><p>Linje: ' .
+            $line_number . '</p><p>Fil: ' . $file_name . '</p>');
     // If developer status is set to false, only show user friendly message
-    else
-    {
+    } else {
         die(CONNECT_ERROR);
     }
 }
@@ -48,21 +50,21 @@ function connect_error($line_number, $file_name) {
  */
 function query_error($query, $line_number, $file_name)
 {
-    global $mysqli;
+    global $db;
 
     // If developer status is set to true, show all information
     if (DEVELOPER_STATUS) {
         $message =
-            '<strong>' . $mysqli->error . '</strong><br>
+            '<strong>' . $db->error . '</strong><br>
 			Linje: <strong>' . $line_number .' </strong><br>
 			Fil: <strong>' . $file_name . '</strong>
 			<pre class="prettyprint lang-sql linenums"><code>' . $query . '</code></pre>';
 
         alert('danger', $message);
-        $mysqli->close();
+        $db->close();
     } else {
         alert('danger', 'Der skete en fejl, prøv venligst igen. Kontakt os hvis problemet fortsætter');
-        $mysqli->close();
+        $db->close();
     }
 }
 
@@ -115,31 +117,34 @@ function pagination($page, $page_no, $items_total, $page_length, $page_around = 
         // Page to start the for-loop from, at least 2 below (or what's set in page_around) the current page
         $page_from = $page_no - $page_around;
 
-        // If current page (page_no) is in the last half of visible pages, set page_from to the total pages minus page_around x2 (default 2x2) plus 2. Default page_from will be calculated to 6 below the total amount
+        // If current page (page_no) is in the last half of visible pages, set page_from to the total pages minus
+        // page_around x2 (default 2x2) plus 2. Default page_from will be calculated to 6 below the total amount
         if ($page_no > $pages_total - $page_around * 2) $page_from = $pages_total - ($page_around * 2 + 2);
 
-        // If page_from was calculated to be below 2, we start from the lowest number 2 (because we always have page one)
+        // If page_from was calculated to be below 2, we start from the lowest number 2
+        // (because we always have page one)
         if ($page_from < 2) $page_from = 2;
 
         // Page to end the for-loop with, at least 2 above (or what's set in page_around) the current page
         $page_to = $page_no + $page_around;
 
-        // If current page (page_no) is in the first half of visible pages, set page_to, to page_around x2 (default 2x2), plus 3. Default page_to, will be calcaluted to 7
+        // If current page (page_no) is in the first half of visible pages, set page_to, to page_around x2
+        // (default 2x2), plus 3. Default page_to, will be calcaluted to 7
         if ($page_no <= $page_around * 2) $page_to = $page_around * 2 + 3;
 
-        // If page_to was calculated to be above or equal to the total amount of pages, we end with the highest number possible. One below the total number, because we always have the last page.
+        // If page_to was calculated to be above or equal to the total amount of pages, we end with the highest
+        // number possible. One below the total number, because we always have the last page.
         if ($page_to >= $pages_total) $page_to = $pages_total - 1;
 
         echo '<ul class="pagination">';
 
         // If current page is greater than 1, show previous button
-        if ($page_no > 1)
-        {
-            echo '<li><a href="index.php?page=' . $page . '&page-no=' . ($page_no - 1) . '" data-page="' . $page . '" data-params="page-no=' . ($page_no - 1) . '"><i class="fa fa-angle-left fa-fw" aria-hidden="true"></i></a></li>';
-        }
-        // If current page is not greater than 1 and show_disabled_arrows is set to true, show disabled previous link
-        else if ($show_disabled_arrows)
-        {
+        if ($page_no > 1) {
+            echo '<li><a href="index.php?page=' . $page . '&page-no=' . ($page_no - 1) . '" data-page="' . $page .
+                 '" data-params="page-no=' . ($page_no - 1) .
+                 '"><i class="fa fa-angle-left fa-fw" aria-hidden="true"></i></a></li>';
+        } // If current page is not greater than 1 and show_disabled_arrows is set to true, show disabled previous link
+        else if ($show_disabled_arrows) {
             echo '<li class="disabled"><span><i class="fa fa-angle-left fa-fw" aria-hidden="true"></i></span></li>';
         }
 
@@ -147,20 +152,19 @@ function pagination($page, $page_no, $items_total, $page_length, $page_around = 
         echo '<li' . ($page_no == 1 ? ' class="active"' : '') . '><a href="index.php?page=' . $page . '&page-no=1" data-page="' . $page . '" data-params="page-no=1">1</a></li>';
 
         // If page_from is greater than 2, we have skipped some pages, and show 3 dots
-        if ($page_from > 2)
-        {
+        if ($page_from > 2) {
             echo '<li class="disabled"><span>&hellip;</span></li>';
         }
 
-        // Do for-loop, start from number in page_from, and end with the number in page_to, increment with one each time the loop runs
-        for($i = $page_from; $i <= $page_to; $i++)
-        {
+        // Do for-loop, start from number in page_from, and end with the number in page_to,
+        // increment with one each time the loop runs
+
+        for ($i = $page_from; $i <= $page_to; $i++) {
             echo '<li' . ($page_no == $i ? ' class="active"' : '') . '><a href="index.php?page=' . $page . '&page-no=' . $i . '" data-page="' . $page . '" data-params="page-no=' . $i . '">' . $i . '</a></li>';
         }
 
         // If page_to is smaller than the second last page, we have skipped some pages in the end, so we show 3 dots
-        if ($page_to < $pages_total - 1)
-        {
+        if ($page_to < $pages_total - 1) {
             echo '<li class="disabled"><span>&hellip;</span></li>';
         }
 
@@ -168,13 +172,10 @@ function pagination($page, $page_no, $items_total, $page_length, $page_around = 
         echo '<li' . ($page_no == $pages_total ? ' class="active"' : '') . '><a href="index.php?page=' . $page . '&page-no=' . $pages_total . '" data-page="' . $page . '" data-params="page-no=' . $pages_total . '">' . $pages_total . '</a></li>';
 
         // If current page is smaller than pages total, show next link
-        if ($page_no < $pages_total)
-        {
+        if ($page_no < $pages_total) {
             echo '<li><a href="index.php?page=' . $page . '&page-no=' . ($page_no + 1) . '" data-page="' . $page . '" data-params="page-no=' . ($page_no + 1) . '"><i class="fa fa-angle-right fa-fw" aria-hidden="true"></i></a></li>';
-        }
-        // If current page is not smaller than pages total and show_disabled_arrows is set to true, show disabled next link
-        else if ($show_disabled_arrows)
-        {
+        } // If current page is not smaller than pages total and show_disabled_arrows is set to true, show disabled next link
+        else if ($show_disabled_arrows) {
             echo '<li class="disabled"><span><i class="fa fa-angle-right fa-fw" aria-hidden="true"></i></span></li>';
         }
 
@@ -184,13 +185,13 @@ function pagination($page, $page_no, $items_total, $page_length, $page_around = 
 
 /**
  * Function to get links from related menu
- * @param int $menu_id:			id for the related menu, links should be pulled from
+ * @param int $menu_id: id for the related menu, links should be pulled from
  * @param string $page_url_key:	URL key for current page
  * @param string $post_url_key: URL key for current post
  */
 function get_menu_links($menu_id, $page_url_key = '', $post_url_key = '')
 {
-    global $mysqli;
+    global $db;
 
     // Get links to bookmarks and active pages/posts to the main menu from the database
     $query =
@@ -216,17 +217,15 @@ function get_menu_links($menu_id, $page_url_key = '', $post_url_key = '')
 				post_status = 1)
 			ORDER BY
 				menu_link_order";
-    $result = $mysqli->query($query);
+    $result = $db->query($query);
 
     // If result returns false, use the function query_error to show debugging info
     if (!$result) query_error($query, __LINE__, __FILE__);
 
-    while( $row = $result->fetch_object() )
-    {
+    while ($row = $result->fetch_object()) {
         $url = empty($row->page_url_key) ? './' : 'index.php?page=' . $row->page_url_key;
 
-        switch ($row->menu_link_type_id)
-        {
+        switch ($row->menu_link_type_id) {
             // If link type is 3 (bookmark) append this to the $url
             case 3:
                 // If the bookmark is on the current page, only use the bookmark in url, so clear value in $url
@@ -274,57 +273,48 @@ function fingerprint()
 function login($email, $password)
 {
     // If one of the required fields is empty, show alert
-    if ( empty($email) || empty($password) )
-    {
-        alert('warning', 'Ikke alle påkrævede felter er udfyldt!');
-    }
-    // If all required fields is not empty, continue
-    else
-    {
-        global $mysqli;
+    if (empty($email) || empty($password)) {
+        alert('warning', 'Alle felter skal være udfyldt!');
+    } else {
+        global $db;
 
-        $email	= $mysqli->escape_string($email);
+        $email = $db->escape_string($email);
 
         // Select active user that matches the typed e-mail address
-        $query	=
+        $query =
             "SELECT 
-				bruger_id, bruger_brugernavn, bruger_password, rolle_niveau
+				bruger_id, bruger_email, bruger_password, rolle_niveau
 			FROM 
 				brugere
-			INNER JOIN 
-				roller ON brugere.fk_rolle_id = roller.rolle_id
+            INNER JOIN
+                roller ON roller.rolle_id = brugere.fk_rolle_id
 			WHERE 
 				bruger_email = '$email' 
 			AND 
 				bruger_status = 1";
-        $result = $mysqli->query($query);
+        $result = $db->query($query);
 
         // If result returns false, use the function query_error to show debugging info
-        if (!$result) {
-            query_error($query, __LINE__, __FILE__);
-        }
+        if (!$result) query_error($query, __LINE__, __FILE__);
 
         // If a user with the typed email was found in the database, do this
-        if ( $result->num_rows == 1 ) {
+        if ($result->num_rows == 1) {
             $row = $result->fetch_object();
 
             // Check if the typed password matched the hashed password in the Database
-            if ( password_verify($password, $row->user_password) ) {
+            if (password_verify($password, $row->bruger_password)) {
                 // Give the current session a new id before saving user information into it
                 session_regenerate_id();
 
-                $_SESSION['user']['id']				= $row->user_id;
-                $_SESSION['user']['access_level']	= $row->role_access_level;
-                $_SESSION['fingerprint'] 			= fingerprint();
+                $_SESSION['user']['id']           = $row->bruger_id;
+                $_SESSION['user']['access_level'] = $row->rolle_niveau;
+                $_SESSION['fingerprint']          = fingerprint();
 
                 return true;
             } else {
                 alert('warning', 'Den indtastede e-mailadresse og/eller adgangskode er ikke korrekt');
             }
-        }
-        // If no user with the typed email was found in the database, show this alert
-        else
-        {
+        } else {
             alert('warning', 'Den indtastede e-mailadresse og/eller adgangskode er ikke korrekt');
         }
     }
@@ -344,7 +334,7 @@ function logout()
 }
 
 /**
- * Function to check if the current users access level is 1000, which is equal to Super Admin
+ * Function to check if the current users access level is 1000, which is equal to Admin
  * @return bool
  */
 function is_admin()
@@ -353,15 +343,15 @@ function is_admin()
 }
 
 /**
- * Function to check if the fingerprint stored in session, matches to current fingerprint returned from the function fingerprint()
+ * Function to check if the fingerprint stored in session, matches to current fingerprint
+ * returned from the function fingerprint()
  */
 function check_fingerprint()
 {
     // If the current fingerprint returned from the function doesn't match the fingerprint stored in session, logout!
-    if ( $_SESSION['fingerprint'] != fingerprint() )
-    {
+    if ($_SESSION['fingerprint'] != fingerprint()) {
         logout();
-        header('Location: index.php');
+        redirect_to('index.php');
         exit;
     }
 }
@@ -375,15 +365,12 @@ function check_last_activity()
     if (!DEVELOPER_STATUS)
     {
         // If session last activity is set and the current timestamp + 30 mins is less than current timestamp, log the user out
-        if ( isset($_SESSION['last_activity']) && $_SESSION['last_activity'] + 1800 < time() )
-        {
+        if (isset($_SESSION['last_activity']) && $_SESSION['last_activity'] + 1800 < time()) {
             logout();
-            header('Location: index.php');
+            redirect_to('index.php');
             exit;
-        }
-        // Or update the session with current timestamp
-        else
-        {
+        } // Or update the session with current timestamp
+        else {
             $_SESSION['last_activity'] = time();
         }
     }
@@ -400,8 +387,7 @@ function shorten_string($string, $chars)
     $string = strip_tags($string);
 
     // If string contains more characters than the amount to display, do this
-    if (mb_strlen($string, 'utf8mb4') > $chars)
-    {
+    if (mb_strlen($string, 'utf8mb4') > $chars) {
         // Find the last space within X characters
         $last_space	= strrpos(substr($string, 0, $chars + 1), ' ');
         // Cut string and add ... after the last found space
@@ -439,9 +425,9 @@ function send_mail($to, $subject, $message, $from, $from_name)
  */
 function getProducts($category_sort)
 {
-    global $mysqli;
+    global $db;
 //    $category_sort = $_GET['kategori'];
-    return $mysqli->query('SELECT 
+    return $db->query('SELECT 
                                     produkt_id, produkt_varenr, produkt_navn, produkt_pris
                                     FROM 
                                       produkter
@@ -453,27 +439,182 @@ function getProducts($category_sort)
 }
 
 
-    function getProduct($id) {
-        global $mysqli;
-        return $mysqli->query("SELECT 
-                                    produkt_id, 
-                                    produkt_varenr, 
-                                    produkt_navn, 
-                                    produkt_beskrivelse,
-                                    produkt_pris, 
-                                    DATE_FORMAT(produkt_dyrktid_fra,'%M') AS dyrk_maaned_fra,
-                                    DATE_FORMAT(produkt_dyrktid_til,'%M') AS dyrk_maaned_til,
-                                    produkt_billede1,
-                                    produkt_billede2,
-                                    produkt_billede3,
-                                    jordtype_navn,
-                                    kategori_navn
-                                    FROM 
-                                      produkter
-                                    INNER JOIN
-                                      jordtyper ON produkter.fk_jordtype_id = jordtyper.jordtype_id
-                                    INNER JOIN
-                                      kategorier ON produkter.fk_kategori_id = kategorier.kategori_id
-                                    WHERE 
-                                      produkt_status = 1 AND produkt_id = " . $id);
+/**
+ * @param $id
+ * @return bool|mysqli_result
+ */
+function getProduct($id)
+{
+    global $db;
+    return $db->query("SELECT 
+                                produkt_id, 
+                                produkt_varenr, 
+                                produkt_navn, 
+                                produkt_beskrivelse,
+                                produkt_pris, 
+                                DATE_FORMAT(produkt_dyrktid_fra,'%M') AS dyrk_maaned_fra,
+                                DATE_FORMAT(produkt_dyrktid_til,'%M') AS dyrk_maaned_til,
+                                produkt_billede1,
+                                produkt_billede2,
+                                produkt_billede3,
+                                jordtype_navn,
+                                kategori_navn
+                                FROM 
+                                  produkter
+                                INNER JOIN
+                                  jordtyper ON produkter.fk_jordtype_id = jordtyper.jordtype_id
+                                INNER JOIN
+                                  kategorier ON produkter.fk_kategori_id = kategorier.kategori_id
+                                WHERE 
+                                  produkt_status = 1 AND produkt_id = " . $id);
+}
+
+/**
+ * @param $id
+ * @param $brugernavn
+ * @param $fornavn
+ * @param $efternavn
+ * @param $adgangskode
+ * @param $bekraeft_adgangskode
+ * @param $adresse
+ * @param $postnr
+ * @param $by
+ * @param $tlf
+ * @param $email
+ * @param null $rolle
+ */
+
+function edit_user($id,
+                    $brugernavn,
+                    $fornavn,
+                    $efternavn,
+                    $adgangskode,
+                    $bekraeft_adgangskode,
+                    $adresse,
+                    $postnr,
+                    $by,
+                    $tlf,
+                    $email,
+                    $rolle)
+{
+    // db er defineret udenfor funktion og gøres derfor global, så den er tilgængelig
+    global $db;
+
+    // Hvis ikke de indtastede adgangskoder er ens, udskrives denne fejl på siden
+    if ($adgangskode != $bekraeft_adgangskode)
+    {
+        alert('warning', 'adganskoder matchede ikke');
+    } else {
+
+        if ( empty($brugernavn) ) {
+            alert('warning', 'brugernavn er påkrævet!');
+        } else {
+            $brugernavn = $db->real_escape_string($brugernavn);
+        }
+
+        if ( empty($fornavn) ) {
+            $fornavn = 'NULL';
+        } else {
+            $fornavn = $db->real_escape_string($fornavn);
+        }
+
+        if ( empty($efternavn) ) {
+            $efternavn = 'NULL';
+        } else {
+            $efternavn = $db->real_escape_string($efternavn);
+        }
+
+        if ( empty($adresse) ) {
+            $adresse = 'NULL';
+        } else {
+            $adresse = $db->real_escape_string($adresse);
+        }
+
+
+        if ( empty($adresse) ) {
+            $adresse = 'NULL';
+        } else {
+            $adresse = $db->real_escape_string($adresse);
+        }
+
+
+        // antal brugere lig indtastede e-mailadresse pånær aktuel bruger
+        $query	= "
+			SELECT 
+				COUNT(bruger_email) AS antal 
+			FROM 
+				brugere 
+			WHERE 
+				bruger_email = '$email' 
+			AND 
+				bruger_id != $id
+		";
+        $result	=  $db->query($query) or die($db->errno);
+        $row	= $result->fetch_object();
+
+        // Hvis der findes nogle brugere med samme e-mail vises denne statusbesked
+        if ($row->antal > 0) {
+            ?>
+            <div class="alert alert-danger alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                E-mail-adressen er ikke tilgængelig
+            </div>
+            <?php
+        } else {
+            // Hvis feltet adgangskode ikke er tomt, ønsker vi at ændre det og kører dette afsnit kode
+            if ( !empty($adgangskode) ) {
+                $hashed_adgangskode = password_hash($adgangskode, PASSWORD_DEFAULT);
+                // Vi gemmer den stump af sql-kode der skal opdatere felter i databasen der vedrører adgangskode
+                $password_sql = ", bruger_password = '$hashed_adgangskode'";
+            }
+            // Ellers skal der ikke ændres noget, så variabel er tom
+            else {
+                $password_sql = '';
+            }
+
+            // Hvis der er sendt en rolle med når funktion køres...
+            if ( isset($rolle) ) {
+                // ...gemmer vi den stump af sql-kode der skal opdatere kolonne til rolle i databasen
+                $rolle_sql = ", fk_rolle_id = $rolle";
+            }
+            // Ellers skal rolle id'et være lig med 'kunde'
+            else {
+                $rolle_sql = ', fk_rolle_id = 2';
+            }
+
+            // Lav forespørgsel til at opdatere brugerens oplysninger i databasen
+            $query	= "
+				UPDATE 
+					brugere
+				SET 
+					bruger_brugernavn = '$brugernavn', 
+					bruger_fornavn = '$fornavn', 
+					bruger_efternavn = '$efternavn', 
+					bruger_password = '$password_sql', 
+					bruger_adresse = '$adresse', 
+					bruger_postnr = $postnr, 
+					bruger_by = '$by', 
+					bruger_tlf = $tlf,
+					bruger_email = $email,
+					fk_rolle_id = $rolle_sql
+				WHERE 
+					bruger_id = $id
+			";
+
+            $db->query($query) or die($db->errno);
+
+            alert('success', 'YaY!');
+        }
     }
+}
+
+/**
+ * Short helper function for URL redirecting
+ * @param null|string $location
+ */
+function redirect_to(string $location = NULL) {
+    if ($location != NULL) {
+        header('Location: ' . $location);
+        exit;
+    }
+}

@@ -50,8 +50,8 @@
             FROM produkter
             WHERE produkt_id IN (' . $product_id_csv . ')
             AND produkt_status = 1';
-    $result = mysqli_query($mysqli, $query) or
-    die( mysqli_error($mysqli) . '<pre>' . $query . '</pre>' . 'Fejl i forespørgsel på linje: ' . __LINE__ . ' i fil: ' . __FILE__);
+        $result = mysqli_query($db, $query) or
+        die(mysqli_error($db) . '<pre>' . $query . '</pre>' . 'Fejl i forespørgsel på linje: ' . __LINE__ . ' i fil: ' . __FILE__);
 
     ?>
 <!--    <div class="table-responsive">-->

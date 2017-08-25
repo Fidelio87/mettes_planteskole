@@ -24,7 +24,7 @@
             <ul class="nav navbar-nav">
                 <?php
                 $query	= "SELECT side_url_navn, side_nav_label FROM sider WHERE side_status = 1 AND side_url_navn != '' AND side_nav_visning = 1 ORDER BY side_nav_sortering";
-                $result	= mysqli_query($mysqli, $query) or die( mysqli_error($mysqli) );
+                $result	= mysqli_query($db, $query) or die( mysqli_error($db) );
                 while( $row = mysqli_fetch_assoc($result) )
                 {
                     ?>
@@ -54,11 +54,29 @@
 								brugere
 							WHERE 
 								bruger_id = $current_user_id";
-                    $result = $mysqli->query($query);
-                        }
+                    $result = $db->query($query);
+
                 if (!$result) query_error($query, __LINE__, __FILE__);
 
+                $user = $result->fetch_object();
+//                var_dump($user);
+                ?>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><?php echo $user->bruger_brugernavn; ?>
+                    <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <?php if ($_SESSION['user']['access_level'] >= 10) { ?>
+                        <li><a href="#"></a> Administration</li>
+                        <?php } ?>
+                        <li><a href="index.php?page=update-user"> Redigér profil</a> </li>
+                        <li><a href="index.php?logout"> Log af</a> </li>
+                    </ul>
 
+                </li>
+                <?php
+                } else {
+                    echo '<li><a href="index.php#login-form"> Log ind</a></li>';
+                }
                 ?>
             </ul>
         </div>
